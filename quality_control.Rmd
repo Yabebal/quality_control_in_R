@@ -104,7 +104,7 @@ rules are used (`rules = c(1,4)`). However, we can use other rules. The rules ar
   - `rules = 3` Four of five consecutive points plot beyond a 1-sigma limit.
   - `rules = 4` Eight consecutive points plot on one side of the center line.
 
-We will see how each arguments can be used in the next section.
+We will see how each argument can be utilized in the next sections.
 
 ## $\bar{x}$ Chart
 
