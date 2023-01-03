@@ -1,5 +1,6 @@
 ---
 title: "Statistical Quality Control in R"
+author: Yabebal Ayalew
 output:
   pdf_document: default
   html_document: default
@@ -8,20 +9,19 @@ date: "2022-12-30"
 
 ## Data Source
 
-The data for this tutorial is coming from a `qcc` package. The data sets are 
+The data for this tutorial are coming from a `qcc` package. The data sets are 
 
-1. `pistonrings`, 
-2. `orangejuice`, 
-3. `orangejuice2` and 
-4. `circuit`
-5. `antifreeze`
+1. `pistonrings` 
+2. `orangejuice`
+3. `circuit`
+4. `antifreeze`
 <br>
 
 More description about these data sets can be obtained if we type `?<dataName>`. *i.e.,* `?pistonrings`, `?circuit`
 
 ## Downloading Latest `qcc` Package
 
-You can install the released version of qcc from CRAN:
+You can install the latest released version of `qcc` from CRAN:
 
 ```{r, eval = F}
 install.packages("qcc")
@@ -29,7 +29,8 @@ install.packages("qcc")
 or the development version from GitHub:
 ``` {r, eval = F}
 # install.packages("devtools")
-devtools::install_github("luca-scr/qcc", build = TRUE, build_opts = c("--no-resave-data", "--no-manual"))
+devtools::install_github("luca-scr/qcc", build = TRUE, 
+                         build_opts = c("--no-resave-data", "--no-manual"))
 ```
 
 ### Load the data sets and `qcc` library
@@ -44,16 +45,15 @@ library(qcc)
 # Load the data
 data("pistonrings")
 data("orangejuice")
-data("orangejuice2")
 data("circuit")
 data("antifreeze")
 ```
 ## Process Monitoring Using $\bar{x}$, $R$ and $S$ Charts
 ### Changing the format of `pistonrings` data
 
-This data set has three variables namely: `r colnames(pistonrings)`. `diameter` of a piston ring is the key quality characteristics that we would like to monitor in the production process. `sample` indicates the rational subgroup that a particular observation belongs. `trial` indicates the production phase. As we have discussed in class, Phase I production (`trial = TRUE`) data mainly used to compute the control limits.<br>
+This data set has *three variables*, namely, `r colnames(pistonrings)`. `diameter` of a piston ring is the key quality characteristics that we would like to monitor in the production process. `sample` indicates the rational subgroup that a particular observation belongs. `trial` indicates the production phase. As we have discussed in class, Phase I production (`trial = TRUE`) data mainly used to compute the control limits. Moreover, it is known that the main purpose of control charts in production phase I is not to *monitor* the production process instead to help the production to be stable and identify and remove assignable causes that cab potentially cause major shifts in the production. <br>
 
-`qcc.groups(data, sample)` is the function to reshape the data for older version of `qcc` package. For `qcc` version 3.0, we have to use `qccGroups(data, x, sample)`.
+`qcc.groups(data, sample)` is the function to reshape the data for older version of `qcc` package. For `qcc` version 3.0, we have to use `qccGroups(data, x, sample)` as `qcc.groups` is deprecated.
 
 ```{r}
 #diameter <- with(pistonrings, qcc.groups(diameter, sample = sample))
@@ -65,7 +65,7 @@ Let's preview the `diamond` data frame.
 ```{r}
 head(diameter)
 ```
-As can be seen above, the data is converted into a wide shape. The main reason for changing the data frame from long to wide is `qcc` function which will be used to draw control charts demand the data to be arranged in the wider format.
+As can be seen above, the data is converted into a wide shape. The main reason for changing the data frame from long to wide is because of the fact that `qcc` function, which we will be using to draw control charts, demands the data to be arranged in the wider format.
 
 ## Few Points on `qcc` Function 
 The classical control charts developed by Shewhart are implemented by `qcc` function of the `qcc` library. To get help about this function type `?qcc` on the console.
@@ -106,10 +106,10 @@ rules are used (`rules = c(1,4)`). However, we can use other rules. The rules ar
 
 We will see how each arguments can be used in the next section.
 
-## x-Bar chart
+## $\bar{x}$ Chart
 
-**Note**<br>
-In class we have seen two methods of estimating process variability. When the sample size for each rational subgroup is small, we can use the *range method*. However, this method loses its efficiency when the sample size is greater than 10. Therefore, when we are using $\bar{x}$ chart to monitor process average, we have to think about the appropriate control chart to monitor process variability with respect to the key quality characteristics.  <br>
+**Note:**<br>
+There are two methods of estimating process variability. When the sample size for each rational subgroup is small, we can use the *range method*. However, this method loses its efficiency when the sample size is greater than 10. Therefore, when we are using $\bar{x}$ chart to monitor process average, we have to think about the appropriate control chart to monitor process variability with respect to the key quality characteristics.  <br>
 
 Based on the `diamond` data set, we know that the first 25 rational subgroups are taken from Phase I production process and can be used to estimate the control limits and central line ($\bar{\bar{x}}$).
 
@@ -118,7 +118,7 @@ Based on the `diamond` data set, we know that the first 25 rational subgroups ar
 output1 <- qcc(data = diameter[1:25,], type = "xbar")
 ```
 
-`output1` is the `qcc` object. We can summaries the result stored in `output1` by using `summary` function as follows
+`output1` is the `qcc` object. We can summarize the result stored in `output1` by using `summary` function as follows
 
 ```{r}
 # Summarize the control chart
@@ -173,25 +173,28 @@ summary(output2)
 plot(output2, title = "x-bar Control Charts")
 ```
 
-If we want to draw the $\bar{x}$ chart for phase II production, we have to set `chart.all = F` of the `plot` function as below.
+If we want to draw the $\bar{x}$ chart for phase II production alone (*i.e.*, hiding phase I control chart), we have to set `chart.all = F` of the `plot` function as below.
 
 ```{r}
 # Excluding Phase I part of the chart
 plot(output2, title = "x-bar Control Charts for Phase II only", chart.all = F)
 ```
 <br>
-As can be seen in the above graph, only rule 1 and 4 are being used to conclude that the process is out of control.At rational subgroup `40` the graph showed that the process comes back to in-control situation and the first out of control situation was detected at rational subgroup `37`. However, We can add additional Western electric rules and able to detect the out of control situation as early as possible. To do that, we have to set `rules = 1:4`.
+As can be seen in the above graph, only rule 1 and 4 are being used to conclude that the process is out of control. At rational subgroup `40`, the graph showed that the process comes back to in-control situation and the first out of control situation was detected at rational subgroup `37`. However, We can add additional Western electric rules and able to detect the out of control situation as early as possible. To do that, we have to set `rules = 1:4`.
 ```{r}
-output3 <- qcc(data = diameter[1:25,], type = "xbar", newdata = diameter[26:40,], rules = 1:4)
+# Western Electric Rules
+output3 <- qcc(data = diameter[1:25,], type = "xbar", newdata = diameter[26:40,], 
+               rules = 1:4)
 
+# Drawing the chart with modified name on the x-axis
 plot(output3, xlab = 'Rational Subgroup')
 ```
 <br>
-The graph indicated that the out of control situation was first noticed on rational subgroup `35`. 
+The graph indicated that the out of control situation was first noticed on rational subgroup `35`. From this particular example, we can understand that by applying the Western Electric sensitizing rules, we can detect shifts in the production process as early as possible as it is better to detect out-of control production process at `35` than detecting it at `37`. The factory/company will be benefited if we manage to detect shift in the production process as early as possible.
 
 ## R Chart
 
-One of the control charts that can be used to monitor process variability. The `qcc` function argument `type = 'R'` can be used to draw the R chart.
+One of the control charts that can be used to monitor process variability is $R$ chart. The `qcc` function argument `type = 'R'` can be used to draw the R chart.
 
 ```{r}
 # R control chart
@@ -204,9 +207,9 @@ summary(Rp)
 plot(Rp, title = "R chart")
 ```
 
-## S Chart
+## $S$ Chart
 
-The S chart can be used when the sample size of is large ($n\geq 10$) and the sample size is variable.
+$S$ chart is the alternative control chart to monitor process variability. It can be used when the sample size is large ($n\geq 10$) and the sample size is *variable*.
 
 ```{r}
 # S chart
@@ -216,8 +219,8 @@ Sc <- qcc(data = diameter[1:25,], newdata = diameter[26:40,], type = "S")
 plot(Sc, title = "S control chart")
 ```
 
-### S chart for Variable Sample Size
-Let's create variable sample size by letting some of the sample elements to deleted form `pistonrings` 
+### $S$ Control Chart for Variable Sample Size
+Let's create variable sample size by letting some of the sample elements to be deleted form `pistonrings` data
 
 ```{r}
 # Removing some observations
@@ -247,9 +250,12 @@ plot(xbar, title = "X-bar chart for variable sample size", add.stats = F)
 ```
 
 ## Moving Range and Individual Chart
-Both the moving range and individual charts are used when forming rational subgroup is irrelevant. When the production process is too slow to produce new items or every items are being inspected automatically, we prefer to use MR chart over the standard Shewhart's charts. <br>
+Both the moving range and individual charts are used when forming rational subgroup is irrelevant. When the production process is too slow to produce new items or every items are being inspected automatically, we prefer to use MR chart over the standard Shewhart's control charts. <br>
 
-For this exercise, we are going to use `antifreeze` data set. Type `?antifreeze` to learn more about the data set. It has 34 reads on water content of batches of *antifreez*.
+For this exercise, we are going to use `antifreeze` data set. Type `?antifreeze` to learn more about the data set. It has 34 reads on water content of batches of *antifreez*. According to [wikipedia](https://en.wikipedia.org/wiki/Antifreeze) 
+
+> An antifreeze is an additive which lowers the freezing point of a water-based liquid. An antifreeze mixture is used to achieve freezing-point depression for cold environments. Common antifreezes also increase the boiling point of the liquid, allowing higher coolant temperature. However, all common antifreeze additives also have lower heat capacities than water, and do reduce water's ability to act as a coolant when added to it.
+
 
 ```{r}
 # Individual chart to monitor process average
@@ -259,7 +265,7 @@ xone <- qcc(data = antifreeze, type = "xbar.one", rule = 1:4)
 plot(xone, title = 'Individual chart')
 ```
 
-The moving range chart can be drawn by using `type = "R"`. However, the methods needs at least two columns to be included in the data frame. Since we construct the MR chart by finding the absolute difference between two consecutive samples, we can create a data frame of two columns. 
+The moving range chart can be drawn by setting `type = "R"`. However, the methods needs at least two columns to be included in the data frame. Since we construct the MR chart by finding the absolute difference between two consecutive samples, we can create a data frame of two columns. 
 
 1. The first column will contain values of `antifreeze` from 1 to `nrow(antifreeze)-1`
 2. The second column will contain values of `antifreeze` from 2 to `nrow(antifreeze)`
@@ -286,5 +292,97 @@ plot(mr, title = "Moving Range Chart")
 ```
 
 ## $p$ and $np$ Charts
+The description of `orangejuice` data set indicated that a can is considered as **nonconforming** if a leak has happened when filled with a liquid.
 
-Frozen orange juice concentrate is packed in 6-oz cardboard cans. These cans are formed on a machine by spinning them from cardboard stock and attaching a metal bottom panel. A can is then inspected to determine whether, when filled, the liquid could possible leak either on the side seam or around the bottom joint. If this occurs, a can is considered nonconforming. The data were collected as 30 samples of 50 cans each at half-hour intervals over a three-shift period in which the machine was in continuous operation. From sample 15 used a new batch of cardboard stock was punt into production. Sample 23 was obtained when an inexperienced operator was temporarily assigned to the machine. After the first 30 samples, a machine adjustment was made. Then further 24 samples were taken from the process. 
+> Frozen orange juice concentrate is packed in 6-oz cardboard cans. These cans are formed on a machine by spinning them from cardboard stock and attaching a metal bottom panel. A can is then inspected to determine whether, when filled, the liquid could possible leak either on the side seam or around the bottom joint. If this occurs, a can is considered nonconforming. The data were collected as 30 samples of 50 cans each at half-hour intervals over a three-shift period in which the machine was in continuous operation. From sample 15 used a new batch of cardboard stock was punt into production. Sample 23 was obtained when an inexperienced operator was temporarily assigned to the machine. After the first 30 samples, a machine adjustment was made. Then further 24 samples were taken from the process. 
+
+The Data has 54 observations on the following 4 variables:
+
+1. `sample` sample id
+2. `D` number of defectives
+3. `size` sample sizes
+4. `trial`trial samples (TRUE/FALSE)
+
+```{r}
+# Preview the data
+head(orangejuice)
+```
+
+The $p$ chart is
+
+```{r, fig.align='center'}
+# P chart
+pc <- qcc(data = orangejuice$D[1:30], sizes = orangejuice$size[1:30], type = "p")
+
+# Plot the chart
+plot(pc, title = "Fractional Nonconforming Chart")
+```
+
+The $p$ chart for Phase II is
+```{r, fig.align='center'}
+# P chart
+pc <- qcc(data = orangejuice$D[1:30], sizes = 50, type = "p", 
+          newdata = orangejuice$D[31:54], newsizes = 50, rules = 1:4)
+
+# Plot the chart
+plot(pc, title = "Fractional Nonconforming Chart")
+```
+
+The $np$ control chart can be drawn if we set `type = "np"` of the `qcc` function.
+```{r, fig.align='center'}
+# nP chart
+np <- qcc(data = orangejuice$D[1:30], sizes = 50, type = "np", 
+          newdata = orangejuice$D[31:54], newsizes = 50)
+
+# Plot the chart
+plot(np, title = "np Chart")
+```
+
+**Note**<br> As can be seen in the above two charts, the basic concision that we will be making whether the process is in or out-of control is exactly the same. 
+
+## $c$ and $u$ Control Charts
+
+The description of `circuit` data set indicated that number of nonconformities were recorded for 100 printed circuits for 26 successive samples.
+
+> Number of nonconformities observed in 26 successive samples of 100 printed circuit boards. Sample 6 and 20 are outside the control limits. Sample 6 was examined by a new inspector and he did not recognize several type of nonconformities that could have been present. Furthermore, the unusually large number of nonconformities in sample 20 resulted from a temperature control problem in the wave soldering machine, which was subsequently repaired. The last 20 samples are further samples collected on inspection units (each formed by 100 boards).
+
+```{r, fig.align='center'}
+# c chart
+cc <- qcc(data = circuit$x[1:26], sizes = 100, type = "c", 
+          newdata = circuit$x[27:46], newsizes = 100)
+
+# Plot the chart
+plot(cc, title = "c Chart")
+```
+The $u$ chart is 
+```{r, fig.align='center'}
+# u chart
+uc <- qcc(data = circuit$x[1:26], sizes = 100, type = "u", 
+          newdata = circuit$x[27:46], newsizes = 100)
+
+# Plot the chart
+plot(uc, title = "u Chart")
+```
+
+
+Have you seen the similarity of the conclusion we can possibly made about the production process? The conclusion is exactly the same. So, the preference to use either $p$ over $np$ or $c$ over $u$ is just merely depending on quality engineers interest. 
+
+### $c$ and $u$ for Variable Sample Size
+```{r}
+# Randomly select 10 row numbers 
+set.seed(23)
+idx <- sample(1:46, size = 10)
+
+# Change the number of circuits for randomly selected rows
+circuit$size[idx] <- sample(50:200, size = 10)
+
+# Preview the data
+head(circuit)
+
+# U and C charts
+uchart <- qcc(data = circuit$x[1:26], sizes = circuit$size[1:26], type = "u", 
+              newdata = circuit$x[27:46], newsizes = circuit$size[27:46], rules = 1:4)
+
+# Plot the chart
+plot(uchart, title = "u Chart")
+```
